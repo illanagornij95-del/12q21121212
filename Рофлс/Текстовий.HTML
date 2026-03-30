@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Плавная гифка с таймером</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #111;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+
+    #gifBox {
+        position: absolute;
+        transition: left 1s linear, top 1s linear;
+        text-align: center;
+    }
+
+    #gifBox img {
+        width: 150px;
+        display: block;
+        pointer-events: none;
+    }
+
+    #countdown {
+        margin-top: 5px;
+        font-size: 18px;
+    }
+</style>
+</head>
+<body>
+
+<div id="gifBox">
+    <img src="jump.gif" alt="Flying GIF">
+    <div id="countdown">0</div>
+</div>
+
+<script>
+    const gifBox = document.getElementById("gifBox");
+    const countdownEl = document.getElementById("countdown");
+
+    // Координаты и паузы
+    const points = [
+        {x: 444, y: 444, pause: 1000},  // 1 сек
+        {x: 121, y: 121, pause: 2000},  // 2 сек
+        {x: 312, y: 213, pause: 3000},  // 3 сек
+        {x: 776, y: 649, pause: 4000},  // 4 сек
+        {x: 311, y: 123, pause: 5000},  // 5 сек
+    ];
+
+    let index = 0;
+
+    function moveToNextPoint() {
+        const point = points[index];
+        const nextIndex = (index + 1) % points.length;
+        const nextPoint = points[nextIndex];
+
+        // Рассчитаем расстояние
+        const dx = Math.abs(nextPoint.x - point.x);
+        const dy = Math.abs(nextPoint.y - point.y);
+        const distance = Math.sqrt(dx*dx + dy*dy);
+
+        const speed = 0.5; // пикселей/ms
+        const moveTime = distance / speed;
+
+        gifBox.style.transition = `left ${moveTime}ms linear, top ${moveTime}ms linear`;
+
+        // Двигаем гифку
+        gifBox.style.left = nextPoint.x + "px";
+        gifBox.style.top = nextPoint.y + "px";
+
+        // Таймер обратного отсчёта
+        let remaining = nextPoint.pause;
+        countdownEl.textContent = Math.ceil(remaining / 1000);
+
+        const timerInterval = setInterval(() => {
+            remaining -= 100;
+            if (remaining <= 0) {
+                countdownEl.textContent = 0;
+                clearInterval(timerInterval);
+            } else {
+                countdownEl.textContent = Math.ceil(remaining / 1000);
+            }
+        }, 100);
+
+        setTimeout(() => {
+            index = nextIndex;
+            moveToNextPoint();
+        }, moveTime + nextPoint.pause);
+    }
+
+    // Начальная позиция
+    gifBox.style.left = points[0].x + "px";
+    gifBox.style.top = points[0].y + "px";
+
+    // Таймер на первой точке
+    let remaining = points[0].pause;
+    countdownEl.textContent = Math.ceil(remaining / 1000);
+    const timerInterval = setInterval(() => {
+        remaining -= 100;
+        if (remaining <= 0) {
+            countdownEl.textContent = 0;
+            clearInterval(timerInterval);
+        } else {
+            countdownEl.textContent = Math.ceil(remaining / 1000);
+        }
+    }, 100);
+
+    // Старт движения после первой паузы
+    setTimeout(() => moveToNextPoint(), points[0].pause);
+</script>
+
+</body>
+</html>
